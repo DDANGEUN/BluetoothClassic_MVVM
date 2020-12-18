@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.lilly.bluetoothclassic.viewmodel.MainViewModel" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:id="@+id/btn_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/button_back"
+            android:onClick="@{()->viewModel.onClickConnect()}"
+            android:text="@{viewModel.btnConnected?@string/disconnect:@string/connect}"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginBottom="200dp">
+            <EditText
+                android:layout_margin="10dp"
+                android:id="@+id/txt_send"
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:layout_margin="10dp"
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_back2"
+                android:onClick="@{()->viewModel.onClickSendData(txtSend.getText().toString())}"
+                android:text="send data"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:enabled="@{viewModel.btnConnected?true:false}"/>
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_gravity="bottom"
+            android:background="@color/app_color2"
+            android:id="@+id/sv_read_data"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="450dp">
+            <TextView
+                android:layout_margin="10dp"
+                android:textColor="@color/white"
+                android:id="@+id/txt_read"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.txtRead}"
+                android:textStyle="bold"
+                android:textSize="15sp"/>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:background="@drawable/round_background_black_trans"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.inProgressView?View.VISIBLE:View.GONE}">
+            <ProgressBar
+                android:layout_marginStart="10dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:indeterminateTint="@color/white"/>
+            <TextView
+                android:textColor="@color/white"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{viewModel.txtProgress}"/>
+        </LinearLayout>
+    </FrameLayout>
+</layout>
