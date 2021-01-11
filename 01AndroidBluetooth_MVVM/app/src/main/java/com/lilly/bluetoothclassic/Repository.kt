@@ -7,9 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import com.lilly.bluetoothclassic.util.Event
 import com.lilly.bluetoothclassic.util.SPP_UUID
@@ -32,7 +30,7 @@ class Repository {
     var mBluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     private var mBluetoothStateReceiver: BroadcastReceiver? = null
     var targetDevice: BluetoothDevice? = null
-    var bleSocket: BluetoothSocket? = null
+    var socket: BluetoothSocket? = null
     var mOutputStream: OutputStream? = null
     var mInputStream: InputStream? = null
 
@@ -59,7 +57,7 @@ class Repository {
             true
         }
     }
-
+    
     fun scanDevice(){
         progressState.postValue("device 스캔 중...")
 
@@ -126,12 +124,9 @@ class Repository {
                             //블루투스 기기 이름의 앞글자가 "RNM"으로 시작하는 기기만을 검색한다
                             if (device_name != null && device_name.length > 4) {
                                 if (device_name.substring(0, 3) == "RNM") {
-                                    if (device_name != "RNM0498" && device_name != "RNM0504" && device_name != "RNM0495") {
-                                        targetDevice = device
-                                        foundDevice = true
-                                        //ConnectBluetoothDevice()
-                                        connectToTargetedDevice(targetDevice)
-                                    }
+                                    targetDevice = device
+                                    foundDevice = true
+                                    connectToTargetedDevice(targetDevice)
                                 }
                             }
                         }
@@ -154,6 +149,7 @@ class Repository {
     }
 
 
+    @ExperimentalUnsignedTypes
     private fun connectToTargetedDevice(targetedDevice: BluetoothDevice?) {
         progressState.postValue("${targetDevice?.name}에 연결중..")
 
@@ -162,16 +158,16 @@ class Repository {
             val uuid = UUID.fromString(SPP_UUID)
             try {
                 // 소켓 생성
-                bleSocket = targetedDevice?.createRfcommSocketToServiceRecord(uuid)
+                socket = targetedDevice?.createRfcommSocketToServiceRecord(uuid)
 
-                bleSocket?.connect()
+                socket?.connect()
 
                 /**
                  * After Connect Device
                  */
                 connected.postValue(true)
-                mOutputStream = bleSocket?.outputStream
-                mInputStream = bleSocket?.inputStream
+                mOutputStream = socket?.outputStream
+                mInputStream = socket?.inputStream
                 // 데이터 수신
                 beginListenForData()
 
@@ -180,7 +176,7 @@ class Repository {
                     e.printStackTrace()
                 connectError.postValue(Event(true))
                 try {
-                    bleSocket?.close()
+                    socket?.close()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -192,22 +188,9 @@ class Repository {
     }
 
 
-    fun getDeviceFromBondedList(name: String): BluetoothDevice? {
-        var selectedDevice: BluetoothDevice? = null
-        val mDevices = mBluetoothAdapter!!.bondedDevices
-        //pair 목록에서 해당 이름을 갖는 기기 검색, 찾으면 해당 device 출력
-        for (device in mDevices) {
-            if (name == device.name) {
-                selectedDevice = device
-                break
-            }
-        }
-        return selectedDevice
-    }
-
     fun disconnect(){
         try {
-            bleSocket?.close()
+            socket?.close()
             connected.postValue(false)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -223,9 +206,6 @@ class Repository {
     /**
      * 블루투스 데이터 송신
      */
-
-
-    @Throws(IOException::class)
     fun sendByteData(data: ByteArray) {
         Thread {
             try {
