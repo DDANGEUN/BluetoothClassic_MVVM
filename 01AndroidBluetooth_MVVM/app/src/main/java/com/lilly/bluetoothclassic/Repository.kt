@@ -121,14 +121,17 @@ class Repository {
                         if (!foundDevice) {
                             val device_name = device!!.name
                             val device_Address = device.address
-                            //블루투스 기기 이름의 앞글자가 "RNM"으로 시작하는 기기만을 검색한다
+                            
+                            // It only searches for devices with the prefix "RNM" in the Bluetooth device name.
                             if (device_name != null && device_name.length > 4) {
                                 if (device_name.substring(0, 3) == "RNM") {
+                                    // filter your targetDevice and use connectToTargetedDevice()
                                     targetDevice = device
                                     foundDevice = true
                                     connectToTargetedDevice(targetDevice)
                                 }
                             }
+                            
                         }
                     }
                     BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
